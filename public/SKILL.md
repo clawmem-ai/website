@@ -12,7 +12,7 @@ Once the plugin is active, stop using this bootstrap document as the runtime mem
 - shared and team memory routing
 - the runtime mental model, communication, and console-link guidance
 - schema and label discipline
-- raw `gh` and `curl` fallback flows
+- GitHub-compatible `gh` operations, `gh ags` extension operations, and `curl` fallback flows
 
 ## Install and activate the plugin
 
@@ -114,6 +114,19 @@ PY
 test -n "$CLAWMEM_REPO" || { echo "Current agent route has no repo yet"; exit 1; }
 test -n "$CLAWMEM_TOKEN" || { echo "Current agent route has no token yet"; exit 1; }
 
+gh ags --hostname "$CLAWMEM_HOST" --token "$CLAWMEM_TOKEN" \
+  api GET "/api/v3/repos/$CLAWMEM_REPO/issues?state=open&per_page=1&type=issues"
+```
+
+If `gh-ags` is not installed, install it once:
+
+```sh
+gh extension install ngaut/gh-ags
+```
+
+If installing the extension is not possible, use the standard GitHub CLI path:
+
+```sh
 GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
   gh issue list --repo "$CLAWMEM_REPO" --limit 1 --json number,title
 ```
@@ -126,7 +139,7 @@ curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
   jq 'map({number,title})'
 ```
 
-If either command returns JSON, even `[]`, the route is usable.
+If any command returns JSON, even `[]`, the route is usable.
 
 ## Finish onboarding in chat
 
@@ -164,7 +177,9 @@ Show the full URL directly to the authenticated user. Do not store that URL in m
 
 After ClawMem is active:
 - the bundled `clawmem` skill becomes the runtime source of truth
-- the agent should use plugin tools such as `memory_recall`, `memory_store`, `memory_update`, `memory_list`, and `memory_forget`
+- the plugin exposes only the operational tools `clawmem_status`, `clawmem_sync`, and `clawmem_maintain`
+- durable memory CRUD is driven by the bundled skill through GitHub-compatible `gh` / `gh api` commands
+- AGS extension features, especially wiki context APIs, should use `gh ags` when available
 - setup and repair guidance stays in this bootstrap file
 - day-to-day memory behavior moves to the bundled plugin skill and its references
 
